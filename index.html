@@ -78,7 +78,7 @@
 
   <script>
     // ================== CONFIG ==================
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/REEMPLAZA_CON_TU_URL/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyl2jYnFtGW0XYyc1XnmdXbUfuEjwDWu_M-W9jKFET-sTKac6WCfH0YeQHTAVvIKGWNiA/exec";
 
 
     const AREAS = {
@@ -171,7 +171,7 @@
           <label><input type="radio" name="q${i}" value="no" /> No</label>
         `;
         right.addEventListener('change', ev => {
-          const v = (new FormData(wrap)).get(`q${i}`); // not used, but illustrative
+          const v = (new FormData(wrap)).get(`q${i}`);
         });
         wrap.appendChild(left); wrap.appendChild(right);
         $q.appendChild(wrap);

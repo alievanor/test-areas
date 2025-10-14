@@ -157,33 +157,34 @@
     const answers = Array(DATA.length).fill(null);
 
     function renderQuestions() {
-      $q.innerHTML = '';
-      DATA.forEach(([text, area], i) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'q';
-        const left = document.createElement('div');
-        left.className = 'q-text';
-        left.innerHTML = `<span>${i+1}. ${text}</span> <span class="pill">${AREAS[area]}</span>`;
-        const right = document.createElement('div');
-        right.className = 'choices';
-        right.innerHTML = `
-          <label><input type="radio" name="q${i}" value="si" /> Sí</label>
-          <label><input type="radio" name="q${i}" value="no" /> No</label>
-        `;
-        right.addEventListener('change', ev => {
-          const v = (new FormData(wrap)).get(`q${i}`);
-        });
-        wrap.appendChild(left); wrap.appendChild(right);
-        $q.appendChild(wrap);
+  $q.innerHTML = '';
+  DATA.forEach(([text, area], i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'q';
 
-        wrap.querySelectorAll('input[type="radio"]').forEach(r => {
-          r.addEventListener('change', () => {
-            answers[i] = (r.value === 'si');
-            updateProgress();
-          });
-        });
+    const left = document.createElement('div');
+    left.className = 'q-text';
+    left.innerHTML = `<span>${i+1}. ${text}</span> <span class="pill">${AREAS[area]}</span>`;
+
+    const right = document.createElement('div');
+    right.className = 'choices';
+    right.innerHTML = `
+      <label><input type="radio" name="q${i}" value="si" /> Sí</label>
+      <label><input type="radio" name="q${i}" value="no" /> No</label>
+    `;
+
+    right.querySelectorAll('input[type="radio"]').forEach(r => {
+      r.addEventListener('change', (ev) => {
+        answers[i] = (ev.target.value === 'si');
+        updateProgress();
       });
-    }
+    });
+
+    wrap.appendChild(left);
+    wrap.appendChild(right);
+    $q.appendChild(wrap);
+  });
+}
     function updateProgress() {
       const done = answers.filter(a => a !== null).length;
       $done.textContent = done;
@@ -225,17 +226,16 @@
     }
 
     async function submitToSheet(payload) {
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } catch(e) {
-        console.warn('No se pudo confirmar el envío remoto:', e);
-      }
-    }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    console.warn('Apps Script error:', res.status, await res.text().catch(()=>'')); 
+  }
+}
 
 document.getElementById('finishBtn').addEventListener('click', async () => {
   const name  = document.getElementById('studentName').value.trim();

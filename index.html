@@ -78,7 +78,7 @@
 
   <script>
     // ================== CONFIG ==================
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBoGva6PqHdOvmi-sfzOhue2XznUYnd5Vlrc790ol6c0G8m5lfj7nK1DiozqVzTBMY4A/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx66ciTZ6gU7mNygoo9ttsTg7UKfZWVniVZs9TJI_CagvviNelH0NrOMRTilEw3RPfuFw/exec";
 
 
     const AREAS = {
@@ -226,6 +226,7 @@
     }
 
 async function submitToSheet(payload) {
+  console.log('enviando payload', payload);
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -234,7 +235,7 @@ async function submitToSheet(payload) {
       body: JSON.stringify(payload)
     });
   } catch (e) {
-    console.warn('No se pudo confirmar el envío (modo no-cors):', e);
+    console.warn('no-cors send error (ignorable):', e);
   }
 }
 

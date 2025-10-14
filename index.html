@@ -5,32 +5,37 @@
   <title>Test de Áreas – Orientación</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --bg:#f7f7fb; --card:#fff; --text:#222; --muted:#666; --primary:#1f6feb; --ok:#16a34a; --warn:#b45309; }
+    :root { --bg:#f7f7fb; --card:#fff; --text:#222; --muted:#666; --primary:#1f6feb; --ok:#16a34a; }
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); }
     .wrap { max-width: 880px; margin: 24px auto; padding: 0 16px; }
     .card { background:var(--card); border-radius:16px; box-shadow: 0 10px 25px rgba(0,0,0,.06); padding: 20px; }
     h1 { margin: 8px 0 12px; font-size: 24px; }
-    .row { display:flex; gap:16px; flex-wrap:wrap; }
-    .col { flex:1 1 280px; }
+
+    /* formulario */
+    .row { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; }
     label { font-weight:600; font-size:14px; display:block; margin-bottom:6px; }
-    input[type="text"] { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; }
+    input[type="text"], select { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; background:#fff; }
+
+    /* preguntas */
     .q { border-top:1px solid #eee; padding:14px 0; display:flex; justify-content:space-between; gap:16px; align-items:center; }
     .q:first-child { border-top:none; }
     .q-text { flex: 1; font-size:15px; }
     .choices { display:flex; gap:10px; }
     .choices label { font-weight:500; }
-    .pill { display:inline-block; background:#eef2ff; color:#3730a3; border-radius:999px; padding:2px 10px; font-size:12px; margin-left:6px; }
+
+    /* progreso */
+    .progress { height:8px; background:#eee; border-radius:999px; overflow:hidden; }
+    .progress > div { height:100%; width:0%; background:var(--primary); transition:width .2s ease; }
+
+    /* acciones y mensajes */
     .actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
     button { border:0; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer; font-size:14px; }
     .btn { background:var(--primary); color:#fff; }
+    .btn:disabled { opacity:.7; cursor:default; }
     .btn.sec { background:#e5e7eb; color:#111827; }
-    .muted { color:var(--muted); font-size:13px; }
-    .result { background:#f0fdf4; border:1px solid #dcfce7; color:#14532d; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
     .error { background:#fff7ed; border:1px solid #ffedd5; color:#7c2d12; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
-    .scores { display:grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap:8px; margin-top:8px; }
-    .score { background:#f9fafb; border:1px solid #eee; border-radius:12px; padding:10px; text-align:center; }
-    .progress { height:8px; background:#eee; border-radius:999px; overflow:hidden; }
-    .progress > div { height:100%; width:0%; background:var(--primary); }
+    .ok { background:#ecfdf5; border:1px solid #bbf7d0; color:#065f46; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
+
     .foot { text-align:center; margin-top:24px; color:#999; font-size:12px; }
   </style>
 </head>
@@ -38,23 +43,33 @@
   <div class="wrap">
     <div class="card">
       <h1>Test de Áreas – Orientación</h1>
-      <p class="muted">50 preguntas, respuestas Sí/No. Al final verás tu área sugerida y se enviará el resultado al docente.</p>
+      <p class="muted">Responde las 50 preguntas con Sí/No. Tu docente revisará los resultados.</p>
 
-<div class="row" style="margin-top:10px">
-  <div class="col">
-    <label>Nombre del estudiante</label>
-    <input id="studentName" type="text" placeholder="Ej: Ana Pérez" />
-  </div>
-  <div class="col">
-    <label>Código estudiante</label>
-    <input id="studentCode" type="text" placeholder="Ej: 2025-091" />
-  </div>
-  <div class="col">
-    <label>Curso / Grupo</label>
-    <input id="studentGroup" type="text" placeholder="Ej: 9A" />
-  </div>
-</div>
+      <!-- FORM -->
+      <div class="row" style="margin-top:10px">
+        <div class="col">
+          <label>Grado</label>
+          <select id="grade">
+            <option value="">Selecciona…</option>
+            <option value="5">5°</option>
+            <option value="8">8°</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Nombre del estudiante</label>
+          <input id="studentName" type="text" placeholder="Ej: Ana Pérez" />
+        </div>
+        <div class="col">
+          <label>Código estudiante</label>
+          <input id="studentCode" type="text" placeholder="Ej: 2025-091" />
+        </div>
+        <div class="col">
+          <label>Curso / Grupo</label>
+          <input id="studentGroup" type="text" placeholder="Ej: 5A / 8B" />
+        </div>
+      </div>
 
+      <!-- progreso -->
       <div style="margin:14px 0 6px; display:flex; align-items:center; gap:10px;">
         <div class="progress" style="flex:1"><div id="bar"></div></div>
         <span class="muted"><span id="done">0</span>/50</span>
@@ -67,29 +82,76 @@
         <button class="btn sec" id="clearBtn">Limpiar respuestas</button>
       </div>
 
-      <div class="result" id="resultBox"></div>
       <div class="error" id="errorBox"></div>
-
-      <div class="scores" id="scoresGrid" style="display:none"></div>
+      <div class="ok" id="okBox">✅ Respuestas enviadas. ¡Gracias!</div>
     </div>
 
     <p class="foot">Hecho para la comunidad educativa · 100% gratuito · Sin rastreadores</p>
   </div>
 
   <script>
-    // ================== CONFIG ==================
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzv0g2FMSi69LJRk-HrJO8-5BNQ0R2rqNfebXZow25_0ASLv-kOHOLRur4e4Zjs7TWMIw/exec";
+    // ========= CONFIG =========
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZqtkr35mlaaPdfK-LIYGvXOrBo3PiRp4-3YZ_4DokDpb9RnEp38Lld75U0cnNQ4BUbg/exec";
 
+    // Áreas
+    const AREAS = { IC:"Ingenio y Creatividad", VL:"Voces y Letras", MU:"Musical", CO:"Corporeidad", SL:"Segunda Lengua" };
 
-    const AREAS = {
-      IC: "Ingenio y Creatividad",
-      VL: "Voces y Letras",
-      MU: "Musical",
-      CO: "Corporeidad",
-      SL: "Segunda Lengua"
-    };
+    // ---- Banco 5º
+    const DATA5 = [
+      ["Cuando algo no funciona como esperaba, pruebo varias formas hasta lograrlo.", "IC"],
+      ["Me gusta organizar información en tablas, listas o pequeños diagramas para entenderla.", "IC"],
+      ["Me entretiene descubrir patrones en juegos, apps o situaciones del día a día.", "IC"],
+      ["Antes de decidir, comparo ventajas y riesgos y elijo la opción más razonable.", "IC"],
+      ["Me siento cómodo siguiendo instrucciones técnicas y ajustándolas si es necesario.", "IC"],
+      ["Disfruto resolver acertijos numéricos o lógicos sin rendirme rápido.", "IC"],
+      ["Suelo proponer atajos para hacer tareas más rápido sin perder calidad.", "IC"],
+      ["Exploro funciones nuevas en herramientas digitales por curiosidad.", "IC"],
+      ["Me interesa entender cómo se conectan causas y efectos en un sistema.", "IC"],
+      ["Prefiero medir y registrar resultados para comparar después.", "IC"],
+      ["Organizo mis ideas en introducción, desarrollo y cierre al escribir.", "VL"],
+      ["Identifico el punto de vista y los argumentos principales en un texto o video.", "VL"],
+      ["Reescribo mis textos para mejorar precisión y coherencia.", "VL"],
+      ["Disfruto investigar varias fuentes para entender un tema polémico.", "VL"],
+      ["En debates, respaldo mi opinión con ejemplos o datos concretos.", "VL"],
+      ["Puedo resumir información extensa sin perder lo esencial.", "VL"],
+      ["Distingo entre hecho, opinión y argumento en lo que leo.", "VL"],
+      ["Identifico sesgos o intenciones en noticias y publicaciones.", "VL"],
+      ["Encuentro la palabra exacta para expresar una idea compleja.", "VL"],
+      ["Me gusta leer por interés personal, no solo por tareas.", "VL"],
+      ["Mantengo un pulso constante al aplaudir o marcar tiempos.", "MU"],
+      ["Distingo notas o instrumentos interpretados al escuchar una canción.", "MU"],
+      ["Aprendo patrones rítmicos por imitación con facilidad.", "MU"],
+      ["Puedo recordar y repetir una melodía corta afinando lo mejor posible.", "MU"],
+      ["Me siento cómodo practicando fragmentos hasta que suenen limpios.", "MU"],
+      ["Coordino respiración o movimiento con la música cuando canto o toco.", "MU"],
+      ["Identifico cuándo una nota suena desafinada y la corrijo.", "MU"],
+      ["Sigo indicaciones musicales básicas como fuerte, suave, rápido o lento.", "MU"],
+      ["Disfruto crear pequeñas ideas musicales o variaciones propias.", "MU"],
+      ["Trabajo en grupo para ajustar entradas, silencios y balance de sonido.", "MU"],
+      ["Aprendo secuencias de movimientos por partes y las integro en conjunto.", "CO"],
+      ["Coordino brazos y piernas con precisión en actividades físicas.", "CO"],
+      ["Mantengo una postura estable y controlo el equilibrio al moverme.", "CO"],
+      ["Identifico y corrijo detalles técnicos en mis movimientos.", "CO"],
+      ["Mejoro con la repetición, notando avances en fuerza, flexibilidad o agilidad.", "CO"],
+      ["Expreso emociones o historias usando el cuerpo, rostro y espacio.", "CO"],
+      ["Respeto tiempos de descanso, hidratación y calentamiento en la práctica.", "CO"],
+      ["Colaboro en equipos, rotando roles y siguiendo reglas del juego.", "CO"],
+      ["Persevero cuando un ejercicio exige disciplina y constancia.", "CO"],
+      ["Me ubico en escena o cancha teniendo en cuenta posiciones.", "CO"],
+      ["Puedo comprender la idea principal de un texto breve en inglés o francés.", "SL"],
+      ["Reconozco vocabulario nuevo usando contexto sin traducir palabra por palabra.", "SL"],
+      ["Mantengo una conversación sencilla sobre temas cotidianos.", "SL"],
+      ["Pronuncio intentando imitar ritmo y entonación del idioma.", "SL"],
+      ["Escribo mensajes cortos con la estructura básica correcta.", "SL"],
+      ["Escucho audios y capto instrucciones o datos específicos en otro idioma.", "SL"],
+      ["Aprendo y aplico reglas gramaticales comunes cuando practico.", "SL"],
+      ["Busco oportunidades para usar otro idioma fuera de clase.", "SL"],
+      ["Me apoyo en frases modelo y luego las adapto a mi idea.", "SL"],
+      ["Puedo explicar en español qué entendí de algo en la otra lengua.", "SL"]
+    ];
 
-    const DATA = [
+    // ---- Banco 8º
+    const DATA8 = [
       ["Cuando tienes un reto personal o actividad por desarrollar, sueles probar varias formas hasta que funciona.", "IC"],
       ["Te resulta natural estimar cuánto tardará una tarea y cumplirlo.", "IC"],
       ["Disfrutas armando o desarmando objetos para ver cómo funcionan.", "IC"],
@@ -100,7 +162,6 @@
       ["Te sientes cómodo siguiendo pasos precisos para lograr un resultado.", "IC"],
       ["Te atraen preguntas como ¿por qué sucede esto? y ¿cómo comprobarlo?", "IC"],
       ["Te divierte optimizar una actividad, hacerlo más rápido o con menos pasos.", "IC"],
-
       ["Puedes explicar una idea con ejemplos claros para que otros la entiendan.", "VL"],
       ["Lees por gusto al menos algunas páginas a la semana.", "VL"],
       ["Te fijas en detalles como títulos, fechas, lugares cuando cuentas una historia.", "VL"],
@@ -111,7 +172,6 @@
       ["Sueles preguntar cómo afectan las decisiones a la comunidad.", "VL"],
       ["Te interesa comprender reglas del idioma para escribir mejor.", "VL"],
       ["Al escuchar una historia, imaginas cómo continuaría o cambiaría el final.", "VL"],
-
       ["Reconoces ritmos con facilidad y los repites con palmas o golpes suaves.", "MU"],
       ["Puedes tararear melodías que escuchaste hace tiempo.", "MU"],
       ["Te gusta aprender secuencias musicales paso a paso hasta que salgan limpias.", "MU"],
@@ -122,7 +182,6 @@
       ["Te motiva practicar una pieza varias veces para perfeccionarla.", "MU"],
       ["Te emocionan canciones por sus armonías o arreglos, no solo por la letra.", "MU"],
       ["Sigues indicaciones de un director o líder de grupo con atención.", "MU"],
-
       ["Te expresas con el cuerpo para mostrar ideas o emociones.", "CO"],
       ["Aprendes movimientos nuevos observando y repitiendo.", "CO"],
       ["Disfrutas actividades que requieren coordinación y control del cuerpo.", "CO"],
@@ -133,7 +192,6 @@
       ["Te sientes cómodo improvisando gestos o movimientos.", "CO"],
       ["Cuidas tu postura y calentamiento para evitar molestias.", "CO"],
       ["Te entusiasma presentarte frente a otros en obras, danzas o torneos.", "CO"],
-
       ["Entiendes instrucciones básicas cuando alguien te habla en otro idioma.", "SL"],
       ["Te gusta adoptar nuevas palabras y pronunciarlas hasta que salgan mejor.", "SL"],
       ["Pierdes la pena al equivocarte si con eso practicas más.", "SL"],
@@ -143,48 +201,66 @@
       ["Relacionas palabras nuevas con imágenes, gestos o contextos.", "SL"],
       ["Usas canciones, juegos o videos para aprender vocabulario.", "SL"],
       ["Te organizas para estudiar un poco cada día en lugar de todo al final.", "SL"],
-      ["Te animas a conversar en otro idioma, aunque no tengas todas las palabras.", "SL"],
+      ["Te animas a conversar en otro idioma, aunque no tengas todas las palabras.", "SL"]
     ];
 
-    // ================== RENDER ==================
+    // estado
+    let DATA = [];
+    let answers = Array(50).fill(null);
+
+    // util: mezclar
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i=a.length-1; i>0; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // refs
     const $q = document.getElementById('questions');
     const $bar = document.getElementById('bar');
     const $done = document.getElementById('done');
-    const $result = document.getElementById('resultBox');
     const $error = document.getElementById('errorBox');
-    const $scoresGrid = document.getElementById('scoresGrid');
+    const $ok = document.getElementById('okBox');
 
-    const answers = Array(DATA.length).fill(null);
+    function showError(msg) {
+      $error.textContent = msg;
+      $error.style.display = 'block';
+      setTimeout(()=> $error.style.display = 'none', 4500);
+    }
 
+    // render preguntas
     function renderQuestions() {
-  $q.innerHTML = '';
-  DATA.forEach(([text, area], i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'q';
+      $q.innerHTML = '';
+      DATA.forEach(([text, area], i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'q';
 
-    const left = document.createElement('div');
-    left.className = 'q-text';
-    left.innerHTML = `<span>${i+1}. ${text}</span> <span class="pill">${AREAS[area]}</span>`;
+        const left = document.createElement('div');
+        left.className = 'q-text';
+        left.textContent = `${i+1}. ${text}`;
 
-    const right = document.createElement('div');
-    right.className = 'choices';
-    right.innerHTML = `
-      <label><input type="radio" name="q${i}" value="si" /> Sí</label>
-      <label><input type="radio" name="q${i}" value="no" /> No</label>
-    `;
+        const right = document.createElement('div');
+        right.className = 'choices';
+        right.innerHTML = `
+          <label><input type="radio" name="q${i}" value="si" /> Sí</label>
+          <label><input type="radio" name="q${i}" value="no" /> No</label>
+        `;
+        right.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', (ev) => {
+            answers[i] = (ev.target.value === 'si');
+            updateProgress();
+          });
+        });
 
-    right.querySelectorAll('input[type="radio"]').forEach(r => {
-      r.addEventListener('change', (ev) => {
-        answers[i] = (ev.target.value === 'si');
-        updateProgress();
+        wrap.appendChild(left);
+        wrap.appendChild(right);
+        $q.appendChild(wrap);
       });
-    });
+    }
 
-    wrap.appendChild(left);
-    wrap.appendChild(right);
-    $q.appendChild(wrap);
-  });
-}
     function updateProgress() {
       const done = answers.filter(a => a !== null).length;
       $done.textContent = done;
@@ -193,102 +269,79 @@
 
     function computeScores() {
       const scores = { IC:0, VL:0, MU:0, CO:0, SL:0 };
-      const detail = DATA.map((row, i) => {
-        const [text, area] = row;
-        const ok = answers[i] === true;
-        if (ok) scores[area] += 1;
-        return { idx:i+1, text, area, yes: ok };
-      });
-      const max = Math.max(...Object.values(scores));
-      const topAreas = Object.entries(scores)
-        .filter(([k,v]) => v === max)
-        .map(([k]) => AREAS[k]);
-      return { scores, detail, topAreas, max };
+      DATA.forEach(([_, area], i) => { if (answers[i] === true) scores[area] += 1; });
+      const vals = Object.values(scores);
+      const max = Math.max(...vals);
+      const topAreas = Object.entries(scores).filter(([k,v]) => v === max).map(([k]) => AREAS[k]);
+      return { scores, topAreas };
     }
 
-    function drawScores(scores) {
-      $scoresGrid.style.display = 'grid';
-      $scoresGrid.innerHTML = '';
-      const order = ["IC","VL","MU","CO","SL"];
-      order.forEach(k => {
-        const div = document.createElement('div');
-        div.className = 'score';
-        div.innerHTML = `<div style="font-size:12px; color:#555">${AREAS[k]}</div>
-                         <div style="font-size:22px; font-weight:800">${scores[k]}/10</div>`;
-        $scoresGrid.appendChild(div);
-      });
+    async function submitToSheet(payload) {
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) { /* no response in no-cors */ }
     }
 
-    function showError(msg) {
-      $error.textContent = msg;
-      $error.style.display = 'block';
-      setTimeout(()=> $error.style.display = 'none', 4500);
+    function loadByGrade(grade) {
+      DATA = shuffle(grade === '5' ? DATA5 : DATA8);
+      answers = Array(DATA.length).fill(null);
+      renderQuestions();
+      updateProgress();
+      $ok.style.display = 'none';
     }
 
-async function submitToSheet(payload) {
-  console.log('enviando payload', payload);
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+    document.getElementById('grade').addEventListener('change', (e) => {
+      const g = e.target.value;
+      if (g === '5' || g === '8') loadByGrade(g);
     });
-  } catch (e) {
-    console.warn('no-cors send error (ignorable):', e);
-  }
-}
 
-document.getElementById('finishBtn').addEventListener('click', async () => {
-  const name  = document.getElementById('studentName').value.trim();
-  const code  = document.getElementById('studentCode').value.trim();
-  const group = document.getElementById('studentGroup').value.trim();
+    // finalizar
+    const $finish = document.getElementById('finishBtn');
+    document.getElementById('finishBtn').addEventListener('click', async () => {
+      const grade = document.getElementById('grade').value.trim();
+      const name  = document.getElementById('studentName').value.trim();
+      const code  = document.getElementById('studentCode').value.trim();
+      const group = document.getElementById('studentGroup').value.trim();
 
-  if (!name || !code || !group) {
-    return showError('Por favor completa Nombre, Código estudiante y Curso/Grupo.');
-  }
-  if (answers.some(a => a === null)) {
-    return showError('Responde todas las preguntas antes de finalizar.');
-  }
+      if (!grade || !name || !code || !group) return showError('Completa Grado, Nombre, Código y Curso/Grupo.');
+      if (answers.some(a => a === null)) return showError('Responde todas las preguntas antes de finalizar.');
 
-  const { scores, detail, topAreas, max } = computeScores();
-  drawScores(scores);
+      $finish.disabled = true;
 
-  $result.style.display = 'block';
-  $result.innerHTML = `<strong>Área sugerida:</strong> ${topAreas.join(' y ')} 
-                       <br/><span class="muted">Puntaje máximo: ${max} / 10</span>`;
+      const { scores, topAreas } = computeScores();
+      const payload = {
+        grade,
+        studentName: name,
+        studentCode: code,
+        studentGroup: group,
+        totals: {
+          "Ingenio y Creatividad": scores.IC,
+          "Voces y Letras": scores.VL,
+          "Musical": scores.MU,
+          "Corporeidad": scores.CO,
+          "Segunda Lengua": scores.SL
+        },
+        topAreas
+      };
 
-  const payload = {
-    studentName: name,
-    studentCode: code,              // <--- NUEVO
-    studentGroup: group,
-    totals: {
-      "Ingenio y Creatividad": scores.IC,
-      "Voces y Letras": scores.VL,
-      "Musical": scores.MU,
-      "Corporeidad": scores.CO,
-      "Segunda Lengua": scores.SL
-    },
-    topAreas,
-    answers: detail,
-    userAgent: navigator.userAgent,
-    ts: new Date().toISOString()
-  };
+      await submitToSheet(payload);
+      $ok.style.display = 'block';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-  await submitToSheet(payload);
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-});
+      setTimeout(()=>{ $finish.disabled = false; }, 2000);
+    });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
       document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-      for (let i=0;i<answers.length;i++) answers[i] = null;
+      if (DATA.length) answers = Array(DATA.length).fill(null);
       updateProgress();
-      $scoresGrid.style.display = 'none';
-      $result.style.display = 'none';
+      $ok.style.display = 'none';
     });
-
-    renderQuestions();
-    updateProgress();
   </script>
 </body>
 </html>

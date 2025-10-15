@@ -2,37 +2,36 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Test de Áreas – Orientación</title>
+  <title>Consejerías Escolares - Orientación escolar EOH</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --bg:#f7f7fb; --card:#fff; --text:#222; --muted:#666; --primary:#1f6feb; --ok:#16a34a; }
+    :root { --bg:#f7f7fb; --card:#fff; --text:#222; --muted:#666; --primary:#1f6feb; }
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); }
     .wrap { max-width: 880px; margin: 24px auto; padding: 0 16px; }
     .card { background:var(--card); border-radius:16px; box-shadow: 0 10px 25px rgba(0,0,0,.06); padding: 20px; }
-    h1 { margin: 8px 0 12px; font-size: 24px; }
+    h1 { margin: 8px 0 12px; font-size: 22px; }
+    .header { display:flex; align-items:center; gap:14px; }
+    .header img { width:56px; height:56px; object-fit:contain; }
 
-    /* formulario */
     .row { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; }
     label { font-weight:600; font-size:14px; display:block; margin-bottom:6px; }
     input[type="text"], select { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; background:#fff; }
 
-    /* preguntas */
     .q { border-top:1px solid #eee; padding:14px 0; display:flex; justify-content:space-between; gap:16px; align-items:center; }
     .q:first-child { border-top:none; }
     .q-text { flex: 1; font-size:15px; }
     .choices { display:flex; gap:10px; }
     .choices label { font-weight:500; }
 
-    /* progreso */
     .progress { height:8px; background:#eee; border-radius:999px; overflow:hidden; }
     .progress > div { height:100%; width:0%; background:var(--primary); transition:width .2s ease; }
 
-    /* acciones y mensajes */
     .actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
     button { border:0; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer; font-size:14px; }
     .btn { background:var(--primary); color:#fff; }
     .btn:disabled { opacity:.7; cursor:default; }
     .btn.sec { background:#e5e7eb; color:#111827; }
+
     .error { background:#fff7ed; border:1px solid #ffedd5; color:#7c2d12; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
     .ok { background:#ecfdf5; border:1px solid #bbf7d0; color:#065f46; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
 
@@ -42,30 +41,47 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Test de Áreas – Orientación</h1>
-      <p class="muted">Responde las 50 preguntas con Sí/No. Tu docente revisará los resultados.</p>
+      <div class="header">
+        <img src="./EOHLogo.jpg" alt="EOH" />
+        <div>
+          <h1>Consejerías Escolares - Orientación escolar EOH</h1>
+          <p class="muted" style="margin:0">Instrucciones: Responde las 50 preguntas en su totalidad con respuesta de SI/NO.</p>
+        </div>
+      </div>
 
       <!-- FORM -->
-      <div class="row" style="margin-top:10px">
-        <div class="col">
-          <label>Grado</label>
-          <select id="grade">
+      <div class="row" style="margin-top:14px">
+        <div>
+          <label>Nivel</label>
+          <select id="nivel">
             <option value="">Selecciona…</option>
-            <option value="5">5°</option>
-            <option value="8">8°</option>
+            <option value="Primaria">Primaria (usa preguntas de 5°)</option>
+            <option value="Bachillerato">Bachillerato (usa preguntas de 8°)</option>
           </select>
         </div>
-        <div class="col">
-          <label>Nombre del estudiante</label>
-          <input id="studentName" type="text" placeholder="Ej: Ana Pérez" />
+        <div>
+          <label>Tipo de estudiante</label>
+          <select id="tipoEst">
+            <option value="">Selecciona…</option>
+            <option value="Nuevo">Nuevo</option>
+            <option value="Antiguo">Antiguo</option>
+          </select>
         </div>
-        <div class="col">
-          <label>Código estudiante</label>
-          <input id="studentCode" type="text" placeholder="Ej: 2025-091" />
+        <div>
+          <label>Jornada</label>
+          <select id="jornada">
+            <option value="">Selecciona…</option>
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+          </select>
         </div>
-        <div class="col">
-          <label>Curso / Grupo</label>
-          <input id="studentGroup" type="text" placeholder="Ej: 5A / 8B" />
+        <div>
+          <label>Curso (3 dígitos)</label>
+          <input id="curso" type="text" inputmode="numeric" maxlength="3" placeholder="Ej: 506" />
+        </div>
+        <div style="grid-column: 1 / -1">
+          <label>Nombre y apellido</label>
+          <input id="nombre" type="text" placeholder="Ej: Ana Pérez" />
         </div>
       </div>
 
@@ -86,17 +102,15 @@
       <div class="ok" id="okBox">✅ Respuestas enviadas. ¡Gracias!</div>
     </div>
 
-    <p class="foot">Hecho para la comunidad educativa · 100% gratuito · Sin rastreadores</p>
+    <p class="foot">Hecho para la comunidad educativa por el área de Orientación · IED Enrique Olaya Herrera</p>
   </div>
 
   <script>
-    // ========= CONFIG =========
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZqtkr35mlaaPdfK-LIYGvXOrBo3PiRp4-3YZ_4DokDpb9RnEp38Lld75U0cnNQ4BUbg/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzC2C1Wp5d2yp4u4dOvu87l2gFFuelI1yZJ2Nz9JA0o9qpkAUNpYeftsgMo1uWiM83Kow/exec";
 
-    // Áreas
     const AREAS = { IC:"Ingenio y Creatividad", VL:"Voces y Letras", MU:"Musical", CO:"Corporeidad", SL:"Segunda Lengua" };
 
-    // ---- Banco 5º
+    // Banco Primaria
     const DATA5 = [
       ["Cuando algo no funciona como esperaba, pruebo varias formas hasta lograrlo.", "IC"],
       ["Me gusta organizar información en tablas, listas o pequeños diagramas para entenderla.", "IC"],
@@ -150,7 +164,7 @@
       ["Puedo explicar en español qué entendí de algo en la otra lengua.", "SL"]
     ];
 
-    // ---- Banco 8º
+    // Banco Bachillerato
     const DATA8 = [
       ["Cuando tienes un reto personal o actividad por desarrollar, sueles probar varias formas hasta que funciona.", "IC"],
       ["Te resulta natural estimar cuánto tardará una tarea y cumplirlo.", "IC"],
@@ -208,139 +222,77 @@
     let DATA = [];
     let answers = Array(50).fill(null);
 
-    // util: mezclar
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i=a.length-1; i>0; i--) {
-        const j = Math.floor(Math.random() * (i+1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
+    function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    const $q=document.getElementById('questions'),$bar=document.getElementById('bar'),$done=document.getElementById('done'),$error=document.getElementById('errorBox'),$ok=document.getElementById('okBox');
 
-    // refs
-    const $q = document.getElementById('questions');
-    const $bar = document.getElementById('bar');
-    const $done = document.getElementById('done');
-    const $error = document.getElementById('errorBox');
-    const $ok = document.getElementById('okBox');
-
-    function showError(msg) {
-      $error.textContent = msg;
-      $error.style.display = 'block';
-      setTimeout(()=> $error.style.display = 'none', 4500);
-    }
-
-    // render preguntas
-    function renderQuestions() {
-      $q.innerHTML = '';
-      DATA.forEach(([text, area], i) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'q';
-
-        const left = document.createElement('div');
-        left.className = 'q-text';
-        left.textContent = `${i+1}. ${text}`;
-
-        const right = document.createElement('div');
-        right.className = 'choices';
-        right.innerHTML = `
-          <label><input type="radio" name="q${i}" value="si" /> Sí</label>
-          <label><input type="radio" name="q${i}" value="no" /> No</label>
-        `;
-        right.querySelectorAll('input[type="radio"]').forEach(r => {
-          r.addEventListener('change', (ev) => {
-            answers[i] = (ev.target.value === 'si');
-            updateProgress();
-          });
-        });
-
-        wrap.appendChild(left);
-        wrap.appendChild(right);
-        $q.appendChild(wrap);
+    function showError(msg){$error.textContent=msg;$error.style.display='block';setTimeout(()=>{$error.style.display='none'},4500);}
+    function renderQuestions(){
+      $q.innerHTML='';
+      DATA.forEach(([text, area], i)=>{
+        const wrap=document.createElement('div');wrap.className='q';
+        const left=document.createElement('div');left.className='q-text';left.textContent=`${i+1}. ${text}`;
+        const right=document.createElement('div');right.className='choices';
+        right.innerHTML=`<label><input type="radio" name="q${i}" value="si" /> Sí</label>
+                         <label><input type="radio" name="q${i}" value="no" /> No</label>`;
+        right.querySelectorAll('input[type="radio"]').forEach(r=>r.addEventListener('change',(ev)=>{answers[i]=(ev.target.value==='si');updateProgress();}));
+        wrap.append(left,right);$q.appendChild(wrap);
       });
     }
+    function updateProgress(){const done=answers.filter(a=>a!==null).length;$done.textContent=done;$bar.style.width=(done/DATA.length*100)+'%';}
+    function computeScores(){const s={IC:0,VL:0,MU:0,CO:0,SL:0};DATA.forEach(([_,a],i)=>{if(answers[i]===true)s[a]+=1;});const max=Math.max(...Object.values(s));const top=Object.entries(s).filter(([k,v])=>v===max).map(([k])=>k);return {scores:s, topAreas:top.map(k=>AREAS[k])};}
+    function nombreValido(s){const c=s.trim().replace(/\s+/g,' ');return c.split(' ').length>=2 && c.length>=5;}
+    function cursoValido(s){return /^\d{3}$/.test(s.trim());}
+    function dupKey({nivel,jornada,curso,nombre}){const n=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();return `eoh:${n(nivel)}|${n(jornada)}|${n(curso)}|${n(nombre)}`;}
 
-    function updateProgress() {
-      const done = answers.filter(a => a !== null).length;
-      $done.textContent = done;
-      $bar.style.width = (done / DATA.length * 100) + '%';
+    function loadByNivel(n){DATA=shuffle(n==='Primaria'?DATA5:DATA8);answers=Array(DATA.length).fill(null);renderQuestions();updateProgress();$ok.style.display='none';}
+    document.getElementById('nivel').addEventListener('change',e=>{const n=e.target.value;if(n==='Primaria'||n==='Bachillerato')loadByNivel(n);});
+
+    async function submitToSheet(payload){
+      try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});}catch(e){}
     }
 
-    function computeScores() {
-      const scores = { IC:0, VL:0, MU:0, CO:0, SL:0 };
-      DATA.forEach(([_, area], i) => { if (answers[i] === true) scores[area] += 1; });
-      const vals = Object.values(scores);
-      const max = Math.max(...vals);
-      const topAreas = Object.entries(scores).filter(([k,v]) => v === max).map(([k]) => AREAS[k]);
-      return { scores, topAreas };
-    }
+    const $finish=document.getElementById('finishBtn');
+    document.getElementById('finishBtn').addEventListener('click',async ()=>{
+      const nivel=document.getElementById('nivel').value.trim();
+      const tipoEst=document.getElementById('tipoEst').value.trim();
+      const jornada=document.getElementById('jornada').value.trim();
+      const curso=document.getElementById('curso').value.trim();
+      const nombre=document.getElementById('nombre').value.trim();
 
-    async function submitToSheet(payload) {
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
-      } catch (e) { /* no response in no-cors */ }
-    }
+      if(!nivel) return showError('Selecciona el nivel.');
+      if(!tipoEst) return showError('Selecciona el tipo de estudiante.');
+      if(!jornada) return showError('Selecciona la jornada.');
+      if(!cursoValido(curso)) return showError('El curso debe tener exactamente 3 dígitos (ej: 506).');
+      if(!nombreValido(nombre)) return showError('Ingresa nombre y apellido (al menos 2 palabras).');
+      if(answers.some(a=>a===null)) return showError('Responde todas las preguntas antes de finalizar.');
 
-    function loadByGrade(grade) {
-      DATA = shuffle(grade === '5' ? DATA5 : DATA8);
-      answers = Array(DATA.length).fill(null);
-      renderQuestions();
-      updateProgress();
-      $ok.style.display = 'none';
-    }
+      const key=dupKey({nivel,jornada,curso,nombre});
+      if(localStorage.getItem(key)) return showError('Ya registraste tus respuestas para este curso y jornada.');
 
-    document.getElementById('grade').addEventListener('change', (e) => {
-      const g = e.target.value;
-      if (g === '5' || g === '8') loadByGrade(g);
-    });
-
-    // finalizar
-    const $finish = document.getElementById('finishBtn');
-    document.getElementById('finishBtn').addEventListener('click', async () => {
-      const grade = document.getElementById('grade').value.trim();
-      const name  = document.getElementById('studentName').value.trim();
-      const code  = document.getElementById('studentCode').value.trim();
-      const group = document.getElementById('studentGroup').value.trim();
-
-      if (!grade || !name || !code || !group) return showError('Completa Grado, Nombre, Código y Curso/Grupo.');
-      if (answers.some(a => a === null)) return showError('Responde todas las preguntas antes de finalizar.');
-
-      $finish.disabled = true;
-
-      const { scores, topAreas } = computeScores();
-      const payload = {
-        grade,
-        studentName: name,
-        studentCode: code,
-        studentGroup: group,
-        totals: {
-          "Ingenio y Creatividad": scores.IC,
-          "Voces y Letras": scores.VL,
-          "Musical": scores.MU,
-          "Corporeidad": scores.CO,
-          "Segunda Lengua": scores.SL
+      $finish.disabled=true;
+      const {scores, topAreas}=computeScores();
+      const payload={
+        nivel, studentType:tipoEst, jornada, curso, studentName:nombre,
+        totals:{
+          "Ingenio y Creatividad":scores.IC,
+          "Voces y Letras":scores.VL,
+          "Musical":scores.MU,
+          "Corporeidad":scores.CO,
+          "Segunda Lengua":scores.SL
         },
         topAreas
       };
-
       await submitToSheet(payload);
-      $ok.style.display = 'block';
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-
-      setTimeout(()=>{ $finish.disabled = false; }, 2000);
+      localStorage.setItem(key,'1');
+      $ok.style.display='block';
+      window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+      setTimeout(()=>{$finish.disabled=false;},1500);
     });
 
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-      if (DATA.length) answers = Array(DATA.length).fill(null);
-      updateProgress();
-      $ok.style.display = 'none';
+    document.getElementById('clearBtn').addEventListener('click',()=>{
+      document.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=false);
+      if(DATA.length) answers=Array(DATA.length).fill(null);
+      updateProgress();$ok.style.display='none';
     });
   </script>
 </body>

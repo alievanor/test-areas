@@ -106,7 +106,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2mdWLjqeiZkWBtilD7jEu5IcPbg7QcU1SUQvuB7B53wZvo4UVI2LweXkNl35kIXI/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzMjOgNczfVqKwaw6Kj0OBg2X86jYYzXLZDuUjPIwhkhtPm2KpTGA4CR9aOL7FOLIxFQ/exec";
 
     const AREAS = { IC:"Ingenio y Creatividad", VL:"Voces y Letras", MU:"Musical", CO:"Corporeidad", SL:"Segunda Lengua" };
 
@@ -270,16 +270,15 @@
       if(localStorage.getItem(key)) return showError('Ya registraste tus respuestas para este curso y jornada.');
 
       $finish.disabled=true;
-      const {scores, topAreas}=computeScores();
-      const payload={
-        nivel, studentType:tipoEst, jornada, curso, studentName:nombre,
-        totals:{
-          "Ingenio y Creatividad":scores.IC,
-          "Voces y Letras":scores.VL,
-          "Musical":scores.MU,
-          "Corporeidad":scores.CO,
-          "Segunda Lengua":scores.SL
-        },
+      const { scores, topAreas } = computeScores();
+      const payload = {
+        role: 'student',
+        level: nivel,
+        studentType: tipoEst,
+        shift: jornada,
+        course: curso,
+        studentName: nombre,
+        totals: { IC: scores.IC, VL: scores.VL, MU: scores.MU, CO: scores.CO, SL: scores.SL },
         topAreas
       };
       await submitToSheet(payload);

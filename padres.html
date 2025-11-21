@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Consejerías Escolares – Orientación EOH (Padres)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#f7f7fb; --card:#fff; --text:#222; --muted:#666; --primary:#1f6feb; --ok:#16a34a; --warn:#b45309; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); }
+    .wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .card { background:var(--card); border-radius:16px; box-shadow: 0 10px 25px rgba(0,0,0,.06); padding: 20px; }
+    h1 { margin: 8px 0 12px; font-size: 22px; }
+    .muted { color:var(--muted); font-size:14px; }
+    .row { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+    @media (max-width: 820px){ .row{ grid-template-columns: 1fr; } }
+    label { font-weight:600; font-size:14px; display:block; margin-bottom:6px; }
+    input[type="text"], select, textarea { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; }
+    .q { border-top:1px solid #eee; padding:14px 0; display:flex; justify-content:space-between; gap:16px; align-items:center; }
+    .q:first-child { border-top:none; }
+    .q-text { flex: 1; font-size:15px; }
+    .choices { display:flex; gap:12px; flex-wrap:wrap; }
+    .choices label { font-weight:500; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+    button { border:0; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer; font-size:14px; }
+    .btn { background:var(--primary); color:#fff; }
+    .btn.sec { background:#e5e7eb; color:#111827; }
+    .note { margin-top:10px; font-size:13px; color:#0a6; display:none; }
+    .error { background:#fff7ed; border:1px solid #ffedd5; color:#7c2d12; padding:12px 14px; border-radius:12px; margin-top:12px; display:none; }
+    .foot { text-align:center; margin-top:22px; color:#999; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Consejerías Escolares – Orientación escolar EOH (Padres)</h1>
+      <p class="muted">Instrucciones: Responda todas las preguntas con <strong>Sí / No / No estoy seguro(a)</strong>. Este formulario es para acudientes.</p>
+
+      <!-- Datos del estudiante / acudiente -->
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Nivel</label>
+          <select id="nivel">
+            <option value="">Seleccione…</option>
+            <option value="Primaria">Primaria (Grado 5º)</option>
+            <option value="Bachillerato">Bachillerato (Grado 8º)</option>
+          </select>
+        </div>
+        <div>
+          <label>Jornada</label>
+          <select id="jornada">
+            <option value="">Seleccione…</option>
+            <option>Mañana</option>
+            <option>Tarde</option>
+          </select>
+        </div>
+        <div>
+          <label>Curso (3 dígitos)</label>
+          <input id="curso" type="text" placeholder="Ej: 501, 802" maxlength="3" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Nombre del estudiante (Nombre y Apellido)</label>
+          <input id="studentName" type="text" placeholder="Ej: Ana Pérez" />
+        </div>
+        <div>
+          <label>Nombre del acudiente</label>
+          <input id="guardianName" type="text" placeholder="Ej: Carlos Pérez" />
+        </div>
+        <div>
+          <label>Observaciones del acudiente (opcional)</label>
+          <input id="obs" type="text" placeholder="Opcional" />
+        </div>
+      </div>
+
+      <div id="questions" style="margin-top:8px"></div>
+
+      <div class="actions">
+        <button class="btn" id="sendBtn">Enviar respuestas</button>
+        <button class="btn sec" id="clearBtn">Limpiar</button>
+      </div>
+
+      <div class="note" id="okMsg">✅ Respuestas enviadas. ¡Gracias!</div>
+      <div class="error" id="errMsg"></div>
+
+      <p class="foot">Hecho para la comunidad educativa por el área de Orientación · IED Enrique Olaya Herrera</p>
+    </div>
+  </div>
+
+<script>
+/* ===================== CONFIG ===================== */
+// Reemplaza por tu URL de Apps Script (…/exec)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzC2C1Wp5d2yp4u4dOvu87l2gFFuelI1yZJ2Nz9JA0o9qpkAUNpYeftsgMo1uWiM83Kow/exec";
+
+// claves de áreas (para puntaje)
+const AREAS = { IC:"Ingenio y Creatividad", VL:"Voces y Letras", MU:"Musical", CO:"Corporeidad", SL:"Segunda Lengua" };
+
+/* ========= Preguntas Padres (Primaria 5º) ========= */
+const PAD_5 = {
+  IC: [
+    "Mi hijo(a) disfruta armar, desarmar o construir cosas.",
+    "Le interesa descubrir cómo funcionan los objetos o aparatos.",
+    "Le gusta resolver problemas o acertijos de lógica y números.",
+    "Se muestra curioso(a) y busca distintas formas de solucionar algo.",
+    "Le atraen los juegos que implican estrategia o razonamiento.",
+    "Usa con facilidad herramientas tecnológicas o programas digitales."
+  ],
+  VL: [
+    "Le gusta leer libros, revistas o cuentos por iniciativa propia.",
+    "Suele contar historias con muchos detalles.",
+    "Se interesa por escribir o dibujar lo que imagina.",
+    "Expresa sus ideas con claridad cuando habla.",
+    "Disfruta escuchar y opinar sobre temas variados.",
+    "Tiene facilidad para recordar información que lee o escucha."
+  ],
+  MU: [
+    "Muestra gusto por cantar o tocar algún instrumento.",
+    "Tiene facilidad para seguir el ritmo al aplaudir o moverse.",
+    "Recuerda melodías y las tararea con frecuencia.",
+    "Disfruta participar en actividades musicales o presentaciones.",
+    "Es perseverante cuando ensaya una canción o ritmo nuevo."
+  ],
+  CO: [
+    "Le gusta practicar deportes, bailar o actuar.",
+    "Tiene buena coordinación y equilibrio.",
+    "Cuida su postura y movimientos cuando hace ejercicio.",
+    "Disfruta participar en equipos o grupos artísticos.",
+    "Se esfuerza por mejorar sus movimientos o habilidades físicas."
+  ],
+  SL: [
+    "Se interesa por aprender palabras en otro idioma.",
+    "Le gusta escuchar música, ver videos o jugar en inglés u otro idioma.",
+    "Imitar pronunciaciones nuevas le resulta divertido.",
+    "Usa palabras o frases que aprende en contextos cotidianos.",
+    "Se esfuerza por comunicarse aunque no domine todas las palabras."
+  ]
+};
+
+/* ========= Preguntas Padres (Bachillerato 8º) ========= */
+const PAD_8 = {
+  IC: [
+    "Muestra interés por entender cómo funcionan las cosas.",
+    "Se siente motivado(a) al resolver problemas o desafíos.",
+    "Le gusta investigar o buscar explicaciones sobre lo que no entiende.",
+    "Usa la tecnología como una herramienta para crear o solucionar.",
+    "Propone formas diferentes de realizar una tarea o proyecto.",
+    "Le atraen temas relacionados con ciencia, lógica o innovación."
+  ],
+  VL: [
+    "Se expresa con claridad y usa argumentos para defender sus ideas.",
+    "Disfruta leer sobre temas que le interesan.",
+    "Le gusta escribir textos, reflexiones o relatos.",
+    "Muestra sensibilidad hacia temas sociales o culturales.",
+    "Tiene buena ortografía y se preocupa por mejorar su forma de escribir.",
+    "Participa con gusto en debates, exposiciones o dramatizaciones."
+  ],
+  MU: [
+    "Tiene sensibilidad para identificar ritmo, melodía o afinación.",
+    "Dedica tiempo a practicar su instrumento o mejorar su canto.",
+    "Disfruta crear o interpretar música en grupo.",
+    "Se interesa por conocer distintos géneros musicales.",
+    "Se siente motivado(a) al participar en presentaciones musicales."
+  ],
+  CO: [
+    "Se expresa con el cuerpo a través de danza, teatro o deporte.",
+    "Muestra disciplina en los entrenamientos o ensayos.",
+    "Le gusta participar en eventos deportivos o artísticos.",
+    "Cuida su cuerpo y reconoce la importancia del calentamiento y la hidratación.",
+    "Demuestra liderazgo o colaboración en actividades grupales."
+  ],
+  SL: [
+    "Se interesa por aprender y practicar otro idioma.",
+    "Usa recursos digitales o artísticos (música, series, apps) para mejorar su comprensión.",
+    "Intenta comunicarse en otro idioma sin miedo a equivocarse.",
+    "Se interesa por conocer culturas de otros países.",
+    "Tiene facilidad para recordar y aplicar nuevo vocabulario."
+  ]
+};
+
+/* ===================== UI & LÓGICA ===================== */
+const $q = document.getElementById('questions');
+const $ok = document.getElementById('okMsg');
+const $err = document.getElementById('errMsg');
+
+let QUESTIONS = [];   // [{text, area}]
+let answers = [];     // 'si' | 'no' | 'ns'
+
+function pickSet() {
+  const nivel = document.getElementById('nivel').value;
+  const base = (nivel === 'Primaria') ? PAD_5 : (nivel === 'Bachillerato' ? PAD_8 : null);
+  if (!base) return [];
+
+  const rows = [];
+  Object.entries(base).forEach(([area, arr]) => {
+    arr.forEach(t => rows.push({ text: t, area })); // 5 ó 6 por área
+  });
+  return rows;
+}
+
+function shuffle(a){
+  for (let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function renderQuestions(){
+  QUESTIONS = shuffle(pickSet().slice());        // barajar
+  answers = Array(QUESTIONS.length).fill(null);  // limpiar
+  $q.innerHTML = '';
+  if (!QUESTIONS.length) return;
+
+  QUESTIONS.forEach((q,i)=>{
+    const row = document.createElement('div');
+    row.className = 'q';
+    row.innerHTML = `
+      <div class="q-text">${i+1}. ${q.text}</div>
+      <div class="choices">
+        <label><input type="radio" name="q${i}" value="si"/> Sí</label>
+        <label><input type="radio" name="q${i}" value="no"/> No</label>
+        <label><input type="radio" name="q${i}" value="ns"/> No estoy seguro(a)</label>
+      </div>`;
+    row.querySelectorAll('input[type="radio"]').forEach(r=>{
+      r.addEventListener('change',e=>{ answers[i]=e.target.value; });
+    });
+    $q.appendChild(row);
+  });
+}
+
+document.getElementById('nivel').addEventListener('change', ()=>{
+  renderQuestions();
+});
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('input[type="text"]').forEach(i=>i.value='');
+  ['nivel','jornada'].forEach(id=>document.getElementById(id).value='');
+  $q.innerHTML='';
+  $ok.style.display='none';
+  $err.style.display='none';
+});
+
+function showError(msg){
+  $err.textContent = msg;
+  $err.style.display = 'block';
+  setTimeout(()=> $err.style.display='none', 4500);
+}
+
+function validateForm(){
+  const nivel = document.getElementById('nivel').value;
+  const jornada = document.getElementById('jornada').value;
+  const curso = document.getElementById('curso').value.trim();
+  const studentName = document.getElementById('studentName').value.trim();
+  const guardianName = document.getElementById('guardianName').value.trim();
+
+  if (!nivel) return "Elija el nivel.";
+  if (!jornada) return "Elija la jornada.";
+  if (!/^\d{3}$/.test(curso)) return "Curso debe tener 3 dígitos (ej: 501, 802).";
+  if (!studentName.includes(' ')) return "Escriba nombre y apellido del estudiante.";
+  if (!guardianName.includes(' ')) return "Escriba nombre y apellido del acudiente.";
+  if (!QUESTIONS.length) return "Seleccione el nivel para cargar las preguntas.";
+  if (answers.some(a=>a===null)) return "Responda todas las preguntas.";
+  return null;
+}
+
+function score(){
+  const byArea = { IC:0, VL:0, MU:0, CO:0, SL:0 };
+  const detail = QUESTIONS.map((q,i)=>{
+    const v = answers[i]==='si';
+    if (v) byArea[q.area] += 1;
+    return { text:q.text, area:q.area, ans:answers[i] };
+  });
+  const max = Math.max(...Object.values(byArea));
+  const min = Math.min(...Object.values(byArea));
+  const topAreas = Object.entries(byArea).filter(([k,v])=>v===max).map(([k])=>AREAS[k]);
+  const lowAreas = Object.entries(byArea).filter(([k,v])=>v===min).map(([k])=>AREAS[k]);
+  return { byArea, detail, max, min, topAreas, lowAreas };
+}
+
+async function send(){
+  const err = validateForm();
+  if (err) return showError(err);
+
+  const nivel = document.getElementById('nivel').value;
+  const jornada = document.getElementById('jornada').value;
+  const curso = document.getElementById('curso').value.trim();
+  const studentName = document.getElementById('studentName').value.trim();
+  const guardianName = document.getElementById('guardianName').value.trim();
+  const obs = document.getElementById('obs').value.trim();
+
+  const { byArea, detail, topAreas } = score();
+
+  const payload = {
+    audience: 'padres',             // <- clave para Apps Script
+    nivel, jornada, curso,
+    studentName, guardianName, obs,
+    totals: {
+      "Ingenio y Creatividad": byArea.IC,
+      "Voces y Letras": byArea.VL,
+      "Musical": byArea.MU,
+      "Corporeidad": byArea.CO,
+      "Segunda Lengua": byArea.SL
+    },
+    topAreas,
+    answers: detail,
+    userAgent: navigator.userAgent,
+    ts: new Date().toISOString()
+  };
+
+  try{
+    // Igual que estudiantes: no-cors (el servidor valida duplicados)
+    await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{ 'Content-Type':'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    $ok.style.display='block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
+  }catch(e){
+    showError("No se pudo enviar. Intente nuevamente.");
+  }
+}
+
+document.getElementById('sendBtn').addEventListener('click', send);
+</script>
+</body>
+</html>
